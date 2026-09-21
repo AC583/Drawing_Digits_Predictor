@@ -170,19 +170,6 @@ def preprocess_multiple(image: Image):
     """
     Detect rows, split each row into numbers,
     and preprocess each digit.
-
-    Returns:
-
-    [
-        [
-            [digit, digit],          # number
-            [digit, digit, digit]    # number
-        ],
-        [
-            [digit, digit],
-            [digit, digit]
-        ]
-    ]
     """
 
     # Convert to grayscale
