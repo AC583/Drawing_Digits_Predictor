@@ -14,7 +14,7 @@ import base64
 
 app = FastAPI()
 
-model = tf.keras.models.load_model("mnist_model.keras")
+model = tf.keras.models.load_model("mnist_modelv2.keras")
 
 
 def create_processed_image_url(processed_digits):

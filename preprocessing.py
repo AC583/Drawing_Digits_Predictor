@@ -102,7 +102,7 @@ def split_row_into_numbers(row, gap_threshold=None):
             for component in row
         ])
 
-        gap_threshold = average_width * 1.2
+        gap_threshold = average_width * 1
 
     numbers = [[row[0]]]
 
