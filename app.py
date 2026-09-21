@@ -8,6 +8,8 @@ import numpy as np
 from PIL import Image
 import io
 
+import base64
+
 import matplotlib.pyplot as plt
 
 
@@ -21,12 +23,20 @@ async def predict(file: UploadFile = File(...)):
 
     image = Image.open(io.BytesIO(contents))
 
+    processed_array = preprocess(image)
 
-    image = preprocess(image)
-    image = np.expand_dims(image, axis=0)
+    # Convert processed array (28x28 float32 in [0, 1]) to Base64 PNG
+    processed_uint8 = (processed_array * 255).astype(np.uint8)
+    processed_pil = Image.fromarray(processed_uint8)
+    buf = io.BytesIO()
+    processed_pil.save(buf, format="PNG")
+    b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
+    processed_image_url = f"data:image/png;base64,{b64_str}"
+
+    model_input = np.expand_dims(processed_array, axis=0)
 
     # Make prediction
-    logits = model.predict(image)
+    logits = model.predict(model_input)
 
     probabilities = tf.nn.softmax(logits[0]).numpy()
 
@@ -35,7 +45,8 @@ async def predict(file: UploadFile = File(...)):
 
     return {
         "digit": digit,
-        "confidence": confidence
+        "confidence": confidence,
+        "processed_image": processed_image_url
     }
 
 

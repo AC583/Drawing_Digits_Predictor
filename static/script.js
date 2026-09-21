@@ -46,6 +46,11 @@ document.getElementById("clear").addEventListener("click", () => {
         "Prediction: -";
 
     document.getElementById("confidence").textContent = "";
+
+    const preview = document.getElementById("processed-preview");
+    const container = document.getElementById("processed-container");
+    if (preview) preview.src = "";
+    if (container) container.style.display = "none";
 });
 
 async function predict() {
@@ -72,6 +77,13 @@ async function predict() {
 
         document.getElementById("confidence").textContent =
             `Confidence: ${(result.confidence * 100).toFixed(1)}%`;
+
+        if (result.processed_image) {
+            const preview = document.getElementById("processed-preview");
+            const container = document.getElementById("processed-container");
+            if (preview) preview.src = result.processed_image;
+            if (container) container.style.display = "block";
+        }
 
     }, "image/png");
 }
