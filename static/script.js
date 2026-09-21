@@ -72,17 +72,53 @@ async function predict() {
 
         const result = await response.json();
 
+        // Main combined prediction
+        const mainPrediction = result.rows
+            .map(row => row.map(number => number.number).join(" "))
+            .join("\n");
+
         document.getElementById("prediction").textContent =
-            `Prediction: ${result.digit}`;
+            `Prediction:\n${mainPrediction}`;
 
         document.getElementById("confidence").textContent =
             `Confidence: ${(result.confidence * 100).toFixed(1)}%`;
 
-        if (result.processed_image) {
-            const preview = document.getElementById("processed-preview");
-            const container = document.getElementById("processed-container");
-            if (preview) preview.src = result.processed_image;
-            if (container) container.style.display = "block";
+
+        // Individual digit predictions
+        const processedImages =
+            document.getElementById("processedImages");
+
+        const container =
+            document.getElementById("processed-container");
+
+        processedImages.innerHTML = "";
+
+        result.processed_images.forEach((imageUrl, index) => {
+
+            const prediction = result.digits[index];
+
+            const item = document.createElement("div");
+
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            img.width = 112;
+            img.height = 112;
+            img.style.imageRendering = "pixelated";
+
+            const label = document.createElement("p");
+
+            label.textContent =
+                `Prediction: ${prediction.digit} | Confidence: ${(prediction.confidence * 100).toFixed(1)}%`;
+
+            item.appendChild(img);
+            item.appendChild(label);
+
+            processedImages.appendChild(item);
+        });
+
+        // Show results
+        if (result.processed_images.length > 0) {
+            container.style.display = "block";
         }
 
     }, "image/png");
