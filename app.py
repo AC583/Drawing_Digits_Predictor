@@ -1,3 +1,5 @@
+from PIL import ImageCms
+from preprocessing import preprocess
 from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 
@@ -6,10 +8,12 @@ import numpy as np
 from PIL import Image
 import io
 
+import matplotlib.pyplot as plt
+
+
 app = FastAPI()
 
 model = tf.keras.models.load_model("mnist_model.keras")
-
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -17,19 +21,8 @@ async def predict(file: UploadFile = File(...)):
 
     image = Image.open(io.BytesIO(contents))
 
-    # Convert to grayscale
-    image = image.convert("L")
 
-    # MNIST images are 28x28
-    image = image.resize((28, 28))
-
-    # Convert image to numpy array
-    image = np.array(image).astype("float32")
-
-    # Normalize exactly like training data
-    image = image / 255.0
-
-    # Add batch dimension
+    image = preprocess(image)
     image = np.expand_dims(image, axis=0)
 
     # Make prediction
