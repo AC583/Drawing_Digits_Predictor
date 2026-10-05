@@ -14,7 +14,7 @@ import base64
 
 app = FastAPI()
 
-model = tf.keras.models.load_model("mnist_modelv2.keras")
+model = tf.keras.models.load_model("mnist_modelv3.keras")
 
 
 def create_processed_image_url(processed_digits):
@@ -142,7 +142,7 @@ async def predict(file: UploadFile = File(...)):
                 processed_digits.append(digit)
 
 
-    model_input = np.stack(processed_digits)
+    model_input = np.stack(processed_digits) * 255.0
 
 
     # Predict every digit
