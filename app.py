@@ -10,11 +10,24 @@ from PIL import Image
 
 import io
 import base64
+import json
 
 
 app = FastAPI()
 
-model = tf.keras.models.load_model("mnist_modelv3.keras")
+model = tf.keras.models.load_model("mnist_modelv4.keras")
+
+with open("classes.json", "r") as f:
+    CLASS_NAMES = json.load(f)
+
+SYMBOL_MAP = {
+    "add": "+",
+    "sub": "-",
+    "mul": "*",
+    "div": "/",
+    "eq": "=",
+    "dec": "."
+}
 
 
 def create_processed_image_url(processed_digits):
@@ -142,8 +155,10 @@ async def predict(file: UploadFile = File(...)):
                 processed_digits.append(digit)
 
 
-    model_input = np.stack(processed_digits) * 255.0
-
+    # Convert canvas digits (0=black bg, 1=white stroke) to dataset format expected by model's Rescaling layer (255=white bg, 0=black stroke)
+    model_input = 255.0 - (np.stack(processed_digits) * 255.0)
+    if model_input.ndim == 3:
+        model_input = np.expand_dims(model_input, axis=-1)
 
     # Predict every digit
     logits = model.predict(model_input)
@@ -171,32 +186,34 @@ async def predict(file: UploadFile = File(...)):
                     logit
                 ).numpy()
 
-                digit = int(
+                class_index = int(
                     np.argmax(probabilities)
                 )
+
+                raw_label = CLASS_NAMES[class_index]
+                predicted_symbol = SYMBOL_MAP.get(raw_label, raw_label)
 
                 confidence = float(
                     np.max(probabilities)
                 )
 
-                predicted_number += str(digit)
+                predicted_number += predicted_symbol
 
                 confidences.append(
                     confidence
                 )
 
                 digit_results.append({
-                    "digit": digit,
+                    "digit": predicted_symbol,
                     "confidence": confidence
                 })
 
                 results.append({
-                    "digit": digit,
+                    "digit": predicted_symbol,
                     "confidence": confidence
                 })
 
                 prediction_index += 1
-
 
             predicted_row.append({
                 "number": predicted_number,
