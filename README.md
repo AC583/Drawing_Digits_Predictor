@@ -88,7 +88,6 @@ uvicorn app:app --reload
 ```
 
 The application will be accessible at:
-- **Web UI**: [http://localhost:8000](http://localhost:8000)
-- **Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
+- **Web UI**: [https://drawing-digits-predictor.onrender.com/](https://drawing-digits-predictor.onrender.com/)
+
 
